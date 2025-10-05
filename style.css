@@ -1,0 +1,69 @@
+body {
+  font-family: sans-serif;
+  background-color: #f0f0f0; /* 배경을 연한 회색으로 */
+  padding: 20px;
+}
+
+/* 상단 도구 모음 스타일 */
+.toolbar {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 20px;
+  gap: 10px; /* 요소 사이 간격 */
+}
+
+#documentTitle {
+  width: 300px;
+  padding: 8px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+button {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+#exportBtn {
+    background-color: #28a745; /* 저장 버튼은 초록색으로 */
+}
+
+/* A4 용지 모양의 캔버스 */
+#imageContainer {
+  width: 210mm; /* A4 너비 */
+  min-height: 297mm; /* A4 높이 */
+  margin: 0 auto; /* 가운데 정렬 */
+  padding: 10mm; /* 안쪽 여백 */
+  border: 1px solid #ddd;
+  background-color: white;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1); /* 그림자 효과 */
+  touch-action: none;
+  position: relative;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+#imageContainer img.draggable {
+  max-width: 200px;
+  margin: 5px;
+  cursor: move;
+  position: absolute; /* A4 용지 안에서 절대 위치로 움직이도록 변경 */
+  touch-action: none;
+  box-sizing: border-box;
+}
+
+#imageContainer img.draggable:hover {
+  outline: 2px solid #007bff;
+}
+/* 기존 CSS 코드는 그대로 두고, 아래 내용만 파일 가장 아래에 추가하세요. */
+
+#takePhotoBtn {
+    background-color: #17a2b8; /* 촬영 버튼은 청록색으로 */
+}

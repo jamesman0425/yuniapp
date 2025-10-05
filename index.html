@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>유니앱</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js"></script>
+</head>
+<body>
+    <div class="toolbar">
+        <button id="addPhotoBtn">갤러리에서 추가</button>
+        <button id="takePhotoBtn">직접 사진 촬영</button> <input type="text" id="documentTitle" placeholder="여기에 문서 제목을 입력하세요">
+        <button id="exportBtn">PDF로 저장</button>
+    </div>
+    
+    <input type="file" id="photoInput" style="display: none;">
+    <input type="file" id="cameraInput" accept="image/*" capture style="display: none;"> <div id="imageContainer"></div>
+
+    <script src="script.js"></script>
+</body>
+</html>
