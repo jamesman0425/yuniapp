@@ -1,26 +1,45 @@
+/* 폰트별 스타일 규칙 */
+.font-gowundodum-regular, .font-gowundodum-regular input, .font-gowundodum-regular h2 { font-family: 'GowunDodum-Regular', sans-serif; }
+.font-nanumgothic, .font-nanumgothic input, .font-nanumgothic h2 { font-family: 'NanumGothic', sans-serif; }
+.font-nanummyeongjo, .font-nanummyeongjo input, .font-nanummyeongjo h2 { font-family: 'NanumMyeongjo', serif; }
+.font-nanumpenscript, .font-nanumpenscript input, .font-nanumpenscript h2 { font-family: 'NanumPenScript', cursive; }
+.font-ibm-plex-sans-kr-regular, .font-ibm-plex-sans-kr-regular input, .font-ibm-plex-sans-kr-regular h2 { font-family: 'IBM-Plex-Sans-KR-Regular', sans-serif; }
+
 body {
-  font-family: sans-serif;
-  background-color: #f0f0f0; /* 배경을 연한 회색으로 */
+  font-family: 'GowunDodum-Regular', sans-serif;
+  background-color: #f0f0f0;
   padding: 20px;
 }
-
-/* 상단 도구 모음 스타일 */
 .toolbar {
   display: flex;
   justify-content: center;
   align-items: center;
   margin-bottom: 20px;
-  gap: 10px; /* 요소 사이 간격 */
+  gap: 10px;
 }
-
-#documentTitle {
-  width: 300px;
+#fontSelector {
   padding: 8px;
   font-size: 16px;
   border: 1px solid #ccc;
   border-radius: 5px;
 }
-
+.control-group {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    background-color: white;
+    padding: 4px 8px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+.control-group label {
+    font-size: 14px;
+}
+.control-group input[type="number"] {
+    width: 45px;
+    border: none;
+    font-size: 16px;
+}
 button {
   background-color: #007bff;
   color: white;
@@ -30,40 +49,92 @@ button {
   cursor: pointer;
   font-size: 16px;
 }
-
-#exportBtn {
-    background-color: #28a745; /* 저장 버튼은 초록색으로 */
-}
-
-/* A4 용지 모양의 캔버스 */
+#addTitleBtn { background-color: #ffc107; color: black; }
+#takePhotoBtn { background-color: #17a2b8; }
+#exportBtn { background-color: #28a745; }
 #imageContainer {
-  width: 210mm; /* A4 너비 */
-  min-height: 297mm; /* A4 높이 */
-  margin: 0 auto; /* 가운데 정렬 */
-  padding: 10mm; /* 안쪽 여백 */
-  border: 1px solid #ddd;
+  width: 210mm;
+  min-height: 297mm;
+  margin: 0 auto;
   background-color: white;
-  box-shadow: 0 0 10px rgba(0,0,0,0.1); /* 그림자 효과 */
-  touch-action: none;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
   position: relative;
-  overflow: hidden;
   box-sizing: border-box;
 }
-
-#imageContainer img.draggable {
-  max-width: 200px;
-  margin: 5px;
+#marginGuide {
+    position: absolute;
+    top: 10mm;
+    bottom: 10mm;
+    left: 10mm;
+    right: 10mm;
+    border: 1px dashed #ddd;
+    z-index: 0;
+}
+.draggable, .title-element {
+  position: absolute;
   cursor: move;
-  position: absolute; /* A4 용지 안에서 절대 위치로 움직이도록 변경 */
   touch-action: none;
   box-sizing: border-box;
+  z-index: 2;
+  border: 2px solid transparent;
+}
+.draggable {
+  width: 200px;
+  display: flex;
+  flex-direction: column;
+}
+.selected {
+  border-color: #007bff;
+}
+.draggable img {
+  width: 100%;
+  display: block;
+}
+.draggable input {
+  width: 100%;
+  border: 1px solid #ccc;
+  text-align: center;
+  padding: 8px;
+  box-sizing: border-box;
+}
+.title-element {
+    width: 80%;
+    top: 30mm;
+    left: 10%;
+}
+.title-element h2 {
+    font-size: 28px;
+    text-align: center;
+    padding: 10px;
+    margin: 0;
+}
+.title-element h2:focus {
+    outline: none;
+}
+.draggable.text-on-top .photo-wrapper { order: 2; }
+.draggable.text-on-top .text-wrapper { order: 1; }
+.swap-btn {
+  position: absolute;
+  top: -1px;
+  right: -1px;
+  padding: 2px 5px;
+  font-size: 12px;
+  background-color: rgba(0, 0, 0, 0.5);
+  border-radius: 3px;
+  opacity: 0;
+  transition: opacity 0.2s;
+  color: white;
+  border: none;
+}
+.selected .swap-btn {
+  opacity: 1;
 }
 
-#imageContainer img.draggable:hover {
-  outline: 2px solid #007bff;
-}
-/* 기존 CSS 코드는 그대로 두고, 아래 내용만 파일 가장 아래에 추가하세요. */
-
-#takePhotoBtn {
-    background-color: #17a2b8; /* 촬영 버튼은 청록색으로 */
+@media (max-width: 768px) {
+    body { padding: 10px; }
+    .toolbar { flex-wrap: wrap; justify-content: flex-start; }
+    #imageContainer { width: 100%; min-height: 0; height: 141vw; padding: 0; }
+    #marginGuide { top: 5mm; bottom: 5mm; left: 5mm; right: 5mm; }
+    .control-group input[type="number"] { width: 40px; font-size: 14px; }
+    #fontSelector { font-size: 14px; }
 }

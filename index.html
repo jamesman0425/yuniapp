@@ -1,23 +1,53 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>유니앱</title>
+    
+    <link href="https://hangeul.pstatic.net/hangeul_static/css/nanum-gothic.css" rel="stylesheet">
+    <link href="https://hangeul.pstatic.net/hangeul_static/css/nanum-myeongjo.css" rel="stylesheet">
+    <link href="https://hangeul.pstatic.net/hangeul_static/css/nanum-pen.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2108@1.1/GowunDodum-Regular.woff" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2105_2@1.0/IBM-Plex-Sans-KR-Regular.woff" rel="stylesheet">
+
     <link rel="stylesheet" href="style.css">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-customfonts/1.0.0/NanumGothic-normal.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-customfonts/1.0.0/NanumMyeongjo-normal.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-customfonts/1.0.0/NanumPenScript-normal.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/yworks/jsPDF-CustomFonts-support@1.0/dist/GowunDodum-Regular-normal.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/yworks/jsPDF-CustomFonts-support@1.0/dist/IBM-Plex-Sans-KR-Regular-normal.js"></script>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js"></script>
 </head>
 <body>
     <div class="toolbar">
-        <button id="addPhotoBtn">갤러리에서 추가</button>
-        <button id="takePhotoBtn">직접 사진 촬영</button> <input type="text" id="documentTitle" placeholder="여기에 문서 제목을 입력하세요">
-        <button id="exportBtn">PDF로 저장</button>
+        <button id="addPhotoBtn">갤러리</button>
+        <button id="takePhotoBtn">촬영</button>
+        <button id="addTitleBtn">제목 추가</button>
+        <select id="fontSelector">
+            <option value="GowunDodum-Regular">고운돋움</option>
+            <option value="NanumGothic">나눔고딕</option>
+            <option value="NanumMyeongjo">나눔명조</option>
+            <option value="NanumPenScript">나눔손글씨펜</option>
+            <option value="IBM-Plex-Sans-KR-Regular">IBM Plex Sans KR</option>
+        </select>
+        <div class="control-group">
+            <label for="fontSize">크기:</label>
+            <input type="number" id="fontSize" value="14" min="8" max="72">
+        </div>
+        <button id="exportBtn">PDF 저장</button>
     </div>
     
-    <input type="file" id="photoInput" style="display: none;">
-    <input type="file" id="cameraInput" accept="image/*" capture style="display: none;"> <div id="imageContainer"></div>
+    <input type="file" id="photoInput" style="display: none;" multiple>
+    <input type="file" id="cameraInput" accept="image/*" capture style="display: none;">
+
+    <div id="imageContainer">
+        <div id="marginGuide"></div>
+    </div>
 
     <script src="script.js"></script>
 </body>
