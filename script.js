@@ -8,6 +8,7 @@ const fontSizeInput = document.getElementById('fontSize');
 const addPhotoBtn = document.getElementById('addPhotoBtn');
 const takePhotoBtn = document.getElementById('takePhotoBtn');
 const exportBtn = document.getElementById('exportBtn');
+const exportJpgBtn = document.getElementById('exportJpgBtn'); // JPG 버튼 추가
 const deleteBtn = document.getElementById('deleteBtn');
 const photoInput = document.getElementById('photoInput');
 const cameraInput = document.getElementById('cameraInput');
@@ -20,7 +21,8 @@ takePhotoBtn.addEventListener('click', () => cameraInput.click());
 addTitleBtn.addEventListener('click', createTitleElement);
 photoInput.addEventListener('change', (event) => handleFileSelect(event));
 cameraInput.addEventListener('change', (event) => handleFileSelect(event));
-exportBtn.addEventListener('click', () => generatePdf());
+exportBtn.addEventListener('click', generatePdf);
+exportJpgBtn.addEventListener('click', generateJpg); // JPG 버튼 리스너 추가
 fontSelector.addEventListener('change', (event) => applyFont(event.target.value));
 fontSizeInput.addEventListener('input', () => applyFontSizes());
 deleteBtn.addEventListener('click', deleteSelectedElement);
@@ -113,6 +115,10 @@ function displayImageAndText(file) {
     textWrapper.classList.add('text-wrapper');
     const newImage = document.createElement('img');
     newImage.src = URL.createObjectURL(file);
+    newImage.onload = () => {
+        wrapper.dataset.ratio = newImage.naturalWidth / newImage.naturalHeight;
+    };
+
     const swapButton = document.createElement('button');
     swapButton.textContent = '위/아래';
     swapButton.classList.add('swap-btn');
@@ -142,7 +148,8 @@ function createTitleElement() {
     imageContainer.appendChild(wrapper);
 }
 
-function generatePdf() {
+// --- (새로 추가) 캡처 준비 및 복원 함수 ---
+function prepareForCapture() {
     if (selectedElement) {
         selectedElement.classList.remove('selected');
         selectedElement = null;
@@ -169,6 +176,36 @@ function generatePdf() {
     imageContainer.querySelectorAll('.draggable input').forEach(processElement);
     const swapButtons = imageContainer.querySelectorAll('.swap-btn');
     swapButtons.forEach(btn => btn.style.display = 'none');
+    
+    return { elementsToRestore, swapButtons };
+}
+
+function restoreAfterCapture({ elementsToRestore, swapButtons }) {
+    elementsToRestore.forEach(item => {
+        item.original.style.display = '';
+        if (item.replacement.parentNode) {
+            item.replacement.parentNode.removeChild(item.replacement);
+        }
+    });
+    swapButtons.forEach(btn => btn.style.display = '');
+}
+
+// --- (새로 추가) JPG 생성 함수 ---
+function generateJpg() {
+    const captureState = prepareForCapture();
+    html2canvas(imageContainer, { scale: 2, useCORS: true }).then(canvas => {
+        const imgData = canvas.toDataURL('image/jpeg', 0.9);
+        const link = document.createElement('a');
+        link.href = imgData;
+        link.download = '유니앱_문서.jpg';
+        link.click();
+        restoreAfterCapture(captureState);
+    });
+}
+
+// (수정) PDF 생성 함수가 공통 함수를 사용하도록 변경
+function generatePdf() {
+    const captureState = prepareForCapture();
     html2canvas(imageContainer, { scale: 2, useCORS: true }).then(canvas => {
         const imgData = canvas.toDataURL('image/png');
         const pdf = new jsPDF('p', 'mm', 'a4');
@@ -176,14 +213,7 @@ function generatePdf() {
         const pdfHeight = pdf.internal.pageSize.getHeight();
         pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
         pdf.save('유니앱_문서.pdf');
-        
-        elementsToRestore.forEach(item => {
-            item.original.style.display = '';
-            if (item.replacement.parentNode) {
-                item.replacement.parentNode.removeChild(item.replacement);
-            }
-        });
-        swapButtons.forEach(btn => btn.style.display = '');
+        restoreAfterCapture(captureState);
     });
 }
 
@@ -193,20 +223,19 @@ interact('.draggable, .title-element')
     listeners: {
       move(event) {
         const target = event.target;
-        let x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx;
-        let y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;
+        let x = (parseFloat(target.dataset.x) || 0) + event.dx;
+        let y = (parseFloat(target.dataset.y) || 0) + event.dy;
 
         target.style.left = x + 'px';
         target.style.top = y + 'px';
 
-        target.setAttribute('data-x', x);
-        target.setAttribute('data-y', y);
+        target.dataset.x = x;
+        target.dataset.y = y;
       },
       start(event) {
         const target = event.target;
-        // transform을 사용하지 않으므로, left/top을 기준으로 data 속성 초기화
-        target.setAttribute('data-x', parseFloat(target.style.left) || 0);
-        target.setAttribute('data-y', parseFloat(target.style.top) || 0);
+        target.dataset.x = parseFloat(target.style.left) || 0;
+        target.dataset.y = parseFloat(target.style.top) || 0;
       }
     },
     modifiers: [interact.modifiers.restrictRect({ restriction: '#marginGuide' })]
@@ -214,40 +243,35 @@ interact('.draggable, .title-element')
   .resizable({
     ignoreFrom: 'input, button, select, h2',
     edges: { top: true, left: true, bottom: true, right: true },
-
-    // --- (수정된 부분) 불안정한 move 리스너를 삭제하고 라이브러리 기본 기능 사용 ---
     listeners: {
         move: function (event) {
-            let { x, y } = event.target.dataset
-
-            x = (parseFloat(x) || 0) + event.deltaRect.left
-            y = (parseFloat(y) || 0) + event.deltaRect.top
-
-            Object.assign(event.target.style, {
-                width: event.rect.width + 'px',
-                height: event.rect.height + 'px',
-                left: x + 'px',
-                top: y + 'px'
-            })
-
-            Object.assign(event.target.dataset, { x, y })
+            let target = event.target;
+            let x = (parseFloat(target.dataset.x) || 0);
+            let y = (parseFloat(target.dataset.y) || 0);
+            let newWidth = event.rect.width;
+            let newHeight = event.rect.height;
+            const isCornerResize = (event.edges.left || event.edges.right) && (event.edges.top || event.edges.bottom);
+            if (isCornerResize && target.dataset.ratio) {
+                const ratio = parseFloat(target.dataset.ratio);
+                newHeight = newWidth / ratio;
+            }
+            target.style.width = newWidth + 'px';
+            target.style.height = newHeight + 'px';
+            x += event.deltaRect.left;
+            y += event.deltaRect.top;
+            target.style.left = x + 'px';
+            target.style.top = y + 'px';
+            target.dataset.x = x;
+            target.dataset.y = y;
         }
     },
-    // -----------------------------------------------------------------
-
     modifiers: [
-        // --- (수정된 부분) 비율 유지를 위한 aspectRatio 모디파이어 추가 ---
-        interact.modifiers.aspectRatio({
-            // 모서리에서 리사이즈 할 때만 비율 유지
-            equalDelta: true,
-        }),
         interact.modifiers.restrictSize({ min: { width: 80, height: 80 } }),
         interact.modifiers.restrictRect({ restriction: '#marginGuide' })
     ],
     inertia: true
   });
 
-// 마우스 오른쪽 클릭 및 길게 누르기 기본 메뉴 비활성화
 window.addEventListener('contextmenu', function (e) { 
   if (e.target.tagName === 'IMG'){
     e.preventDefault(); 
