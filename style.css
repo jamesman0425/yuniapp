@@ -1,9 +1,9 @@
 /* 폰트별 스타일 규칙 */
-.font-gowundodum-regular, .font-gowundodum-regular input, .font-gowundodum-regular h2 { font-family: 'GowunDodum-Regular', sans-serif; }
-.font-nanumgothic, .font-nanumgothic input, .font-nanumgothic h2 { font-family: 'NanumGothic', sans-serif; }
-.font-nanummyeongjo, .font-nanummyeongjo input, .font-nanummyeongjo h2 { font-family: 'NanumMyeongjo', serif; }
-.font-nanumpenscript, .font-nanumpenscript input, .font-nanumpenscript h2 { font-family: 'NanumPenScript', cursive; }
-.font-ibm-plex-sans-kr-regular, .font-ibm-plex-sans-kr-regular input, .font-ibm-plex-sans-kr-regular h2 { font-family: 'IBM-Plex-Sans-KR-Regular', sans-serif; }
+.font-gowundodum-regular, .font-gowundodum-regular input, .font-gowundodum-regular h2, .font-gowundodum-regular div[contenteditable] { font-family: 'GowunDodum-Regular', sans-serif; }
+.font-nanumgothic, .font-nanumgothic input, .font-nanumgothic h2, .font-nanumgothic div[contenteditable] { font-family: 'NanumGothic', sans-serif; }
+.font-nanummyeongjo, .font-nanummyeongjo input, .font-nanummyeongjo h2, .font-nanummyeongjo div[contenteditable] { font-family: 'NanumMyeongjo', serif; }
+.font-nanumpenscript, .font-nanumpenscript input, .font-nanumpenscript h2, .font-nanumpenscript div[contenteditable] { font-family: 'NanumPenScript', cursive; }
+.font-ibm-plex-sans-kr-regular, .font-ibm-plex-sans-kr-regular input, .font-ibm-plex-sans-kr-regular h2, .font-ibm-plex-sans-kr-regular div[contenteditable] { font-family: 'IBM-Plex-Sans-KR-Regular', sans-serif; }
 
 body {
   font-family: 'GowunDodum-Regular', sans-serif;
@@ -50,6 +50,7 @@ button {
   font-size: 16px;
 }
 #addTitleBtn { background-color: #ffc107; color: black; }
+#addTextBtn { background-color: #ffc107; color: black; }
 #takePhotoBtn { background-color: #17a2b8; }
 #exportBtn { background-color: #28a745; }
 #exportJpgBtn { background-color: #fd7e14; }
@@ -76,7 +77,7 @@ button:disabled {
     border: 1px dashed #ddd;
     z-index: 0;
 }
-.draggable, .title-element {
+.draggable, .title-element, .text-element {
   position: absolute;
   cursor: move;
   touch-action: none;
@@ -86,8 +87,8 @@ button:disabled {
 }
 .draggable {
   width: 200px;
+  height: 200px; /* 고정 높이 또는 다른 방식으로 설정 필요 */
   display: flex;
-  flex-direction: column;
 }
 .selected {
   border-color: #007bff;
@@ -100,13 +101,6 @@ button:disabled {
   -webkit-touch-callout: none;
   user-select: none;
   -webkit-user-drag: none;
-}
-.draggable input {
-  width: 100%;
-  border: 1px solid #ccc;
-  text-align: center;
-  padding: 8px;
-  box-sizing: border-box;
 }
 .title-element {
     width: 80%;
@@ -123,28 +117,24 @@ button:disabled {
     outline: none;
 }
 
-.photo-wrapper {
-    flex: 1;
-    min-height: 0;
+.text-element {
+    width: fit-content;
+    max-width: 90%;
+    top: 100mm;
+    left: 20%;
+}
+.text-element div {
+    text-align: center;
+    padding: 5px;
+    margin: 0;
+}
+.text-element div:focus {
+    outline: 1px dashed #ccc;
 }
 
-.draggable.text-on-top .photo-wrapper { order: 2; }
-.draggable.text-on-top .text-wrapper { order: 1; }
-.swap-btn {
-  position: absolute;
-  top: -1px;
-  right: -1px;
-  padding: 2px 5px;
-  font-size: 12px;
-  background-color: rgba(0, 0, 0, 0.5);
-  border-radius: 3px;
-  opacity: 0;
-  transition: opacity 0.2s;
-  color: white;
-  border: none;
-}
-.selected .swap-btn {
-  opacity: 1;
+.photo-wrapper {
+    width: 100%;
+    height: 100%;
 }
 
 @media (max-width: 768px) {
