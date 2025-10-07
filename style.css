@@ -1,4 +1,4 @@
-/* 폰트별 스타일 규칙은 이전과 동일 */
+/* 폰트별 스타일 규칙 */
 .font-gowundodum-regular, .font-gowundodum-regular input, .font-gowundodum-regular h2 { font-family: 'GowunDodum-Regular', sans-serif; }
 .font-nanumgothic, .font-nanumgothic input, .font-nanumgothic h2 { font-family: 'NanumGothic', sans-serif; }
 .font-nanummyeongjo, .font-nanummyeongjo input, .font-nanummyeongjo h2 { font-family: 'NanumMyeongjo', serif; }
@@ -52,8 +52,9 @@ button {
 #addTitleBtn { background-color: #ffc107; color: black; }
 #takePhotoBtn { background-color: #17a2b8; }
 #exportBtn { background-color: #28a745; }
-#deleteBtn { background-color: #dc3545; } /* 새로 추가 */
-button:disabled { /* 새로 추가 */
+#exportJpgBtn { background-color: #fd7e14; }
+#deleteBtn { background-color: #dc3545; }
+button:disabled {
     background-color: #6c757d;
     cursor: not-allowed;
 }
@@ -82,6 +83,7 @@ button:disabled { /* 새로 추가 */
   box-sizing: border-box;
   z-index: 2;
   border: 2px solid transparent;
+  will-change: transform;
 }
 .draggable {
   width: 200px;
@@ -94,6 +96,9 @@ button:disabled { /* 새로 추가 */
 .draggable img {
   width: 100%;
   display: block;
+  -webkit-touch-callout: none;
+  user-select: none;
+  -webkit-user-drag: none;
 }
 .draggable input {
   width: 100%;

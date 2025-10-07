@@ -8,7 +8,7 @@ const fontSizeInput = document.getElementById('fontSize');
 const addPhotoBtn = document.getElementById('addPhotoBtn');
 const takePhotoBtn = document.getElementById('takePhotoBtn');
 const exportBtn = document.getElementById('exportBtn');
-const deleteBtn = document.getElementById('deleteBtn'); // 새로 추가
+const deleteBtn = document.getElementById('deleteBtn');
 const photoInput = document.getElementById('photoInput');
 const cameraInput = document.getElementById('cameraInput');
 
@@ -23,7 +23,7 @@ cameraInput.addEventListener('change', (event) => handleFileSelect(event));
 exportBtn.addEventListener('click', () => generatePdf());
 fontSelector.addEventListener('change', (event) => applyFont(event.target.value));
 fontSizeInput.addEventListener('input', () => applyFontSizes());
-deleteBtn.addEventListener('click', deleteSelectedElement); // 새로 추가
+deleteBtn.addEventListener('click', deleteSelectedElement);
 
 document.addEventListener('DOMContentLoaded', () => {
     applyFont(fontSelector.value);
@@ -35,7 +35,7 @@ imageContainer.addEventListener('click', (e) => {
             selectedElement.classList.remove('selected');
             selectedElement = null;
         }
-        updateToolbar(); // 새로 추가
+        updateToolbar();
     }
 });
 
@@ -90,7 +90,7 @@ function makeElementSelectable(element) {
         if (target) {
             fontSizeInput.value = parseInt(getComputedStyle(target).fontSize);
         }
-        updateToolbar(); // 새로 추가
+        updateToolbar();
     });
 }
 
@@ -99,6 +99,9 @@ function displayImageAndText(file) {
     wrapper.classList.add('draggable');
     makeElementSelectable(wrapper);
     
+    wrapper.style.top = '100px';
+    wrapper.style.left = '50px';
+
     const textInput = document.createElement('input');
     textInput.type = 'text';
     textInput.placeholder = '사진설명';
@@ -146,7 +149,6 @@ function generatePdf() {
         updateToolbar();
     }
     
-    // (이하 PDF 생성 로직은 이전과 동일)
     const elementsToRestore = [];
     const processElement = (element) => {
         const p = document.createElement('p');
@@ -174,6 +176,7 @@ function generatePdf() {
         const pdfHeight = pdf.internal.pageSize.getHeight();
         pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
         pdf.save('유니앱_문서.pdf');
+        
         elementsToRestore.forEach(item => {
             item.original.style.display = '';
             if (item.replacement.parentNode) {
@@ -186,58 +189,67 @@ function generatePdf() {
 
 interact('.draggable, .title-element')
   .draggable({
-    ignoreFrom: 'input, button, select',
+    ignoreFrom: 'input, button, select, h2',
     listeners: {
       move(event) {
         const target = event.target;
-        const x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx;
-        const y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;
-        target.style.transform = `translate(${x}px, ${y}px)`;
+        let x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx;
+        let y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;
+
+        target.style.left = x + 'px';
+        target.style.top = y + 'px';
+
         target.setAttribute('data-x', x);
         target.setAttribute('data-y', y);
       },
+      start(event) {
+        const target = event.target;
+        // transform을 사용하지 않으므로, left/top을 기준으로 data 속성 초기화
+        target.setAttribute('data-x', parseFloat(target.style.left) || 0);
+        target.setAttribute('data-y', parseFloat(target.style.top) || 0);
+      }
     },
     modifiers: [interact.modifiers.restrictRect({ restriction: '#marginGuide' })]
   })
   .resizable({
-    ignoreFrom: 'input, button, select',
+    ignoreFrom: 'input, button, select, h2',
     edges: { top: true, left: true, bottom: true, right: true },
+
+    // --- (수정된 부분) 불안정한 move 리스너를 삭제하고 라이브러리 기본 기능 사용 ---
     listeners: {
-      move(event) {
-        const target = event.target;
-        let x = (parseFloat(target.getAttribute('data-x')) || 0);
-        let y = (parseFloat(target.getAttribute('data-y')) || 0);
-        target.style.width = event.rect.width + 'px';
-        target.style.height = 'auto';
+        move: function (event) {
+            let { x, y } = event.target.dataset
 
-        if (target.classList.contains('title-element')) {
-            const h2 = target.querySelector('h2');
-            const newSize = event.rect.width / 15;
-            h2.style.fontSize = `${newSize < 12 ? 12 : newSize}px`;
+            x = (parseFloat(x) || 0) + event.deltaRect.left
+            y = (parseFloat(y) || 0) + event.deltaRect.top
+
+            Object.assign(event.target.style, {
+                width: event.rect.width + 'px',
+                height: event.rect.height + 'px',
+                left: x + 'px',
+                top: y + 'px'
+            })
+
+            Object.assign(event.target.dataset, { x, y })
         }
-
-        x += event.deltaRect.left;
-        y += event.deltaRect.top;
-        target.style.transform = `translate(${x}px, ${y}px)`;
-        target.setAttribute('data-x', x);
-        target.setAttribute('data-y', y);
-      }
     },
+    // -----------------------------------------------------------------
+
     modifiers: [
-        interact.modifiers.restrictSize({ min: { width: 50 } }), // 100에서 50으로 수정
+        // --- (수정된 부분) 비율 유지를 위한 aspectRatio 모디파이어 추가 ---
+        interact.modifiers.aspectRatio({
+            // 모서리에서 리사이즈 할 때만 비율 유지
+            equalDelta: true,
+        }),
+        interact.modifiers.restrictSize({ min: { width: 80, height: 80 } }),
         interact.modifiers.restrictRect({ restriction: '#marginGuide' })
-    ]
-  })
-  .gesturable({ // 새로 추가 (핀치 줌 기능)
-    onmove: function (event) {
-        const target = event.target;
-        let scale = parseFloat(target.getAttribute('data-scale')) || 1;
-        scale += event.ds;
-
-        let x = (parseFloat(target.getAttribute('data-x')) || 0);
-        let y = (parseFloat(target.getAttribute('data-y')) || 0);
-
-        target.style.transform = `translate(${x}px, ${y}px) scale(${scale})`;
-        target.setAttribute('data-scale', scale);
-    }
+    ],
+    inertia: true
   });
+
+// 마우스 오른쪽 클릭 및 길게 누르기 기본 메뉴 비활성화
+window.addEventListener('contextmenu', function (e) { 
+  if (e.target.tagName === 'IMG'){
+    e.preventDefault(); 
+  }
+});

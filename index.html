@@ -10,12 +10,15 @@
     <link href="https://hangeul.pstatic.net/hangeul_static/css/nanum-pen.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2108@1.1/GowunDodum-Regular.woff" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2105_2@1.0/IBM-Plex-Sans-KR-Regular.woff" rel="stylesheet">
+
     <link rel="stylesheet" href="style.css">
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-customfonts/1.0.0/NanumGothic-normal.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-customfonts/1.0.0/NanumMyeongjo-normal.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-customfonts/1.0.0/NanumPenScript-normal.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/yworks/jsPDF-CustomFonts-support@1.0/dist/GowunDodum-Regular-normal.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/yworks/jsPDF-CustomFonts-support@1.0/dist/IBM-Plex-Sans-KR-Regular-normal.js"></script>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js"></script>
@@ -36,10 +39,11 @@
             <label for="fontSize">크기:</label>
             <input type="number" id="fontSize" value="14" min="8" max="72">
         </div>
-        <button id="deleteBtn" disabled>삭제</button> <button id="exportBtn">PDF 저장</button>
+        <button id="deleteBtn" disabled>삭제</button>
+        <button id="exportJpgBtn">JPG 저장</button> <button id="exportBtn">PDF 저장</button>
     </div>
     
-    <input type="file" id="photoInput" style="display: none;" multiple>
+    <input type="file" id="photoInput" style="display: none;" multiple accept="image/*">
     <input type="file" id="cameraInput" accept="image/*" capture style="display: none;">
 
     <div id="imageContainer">
