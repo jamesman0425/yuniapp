@@ -8,6 +8,7 @@ const fontSizeInput = document.getElementById('fontSize');
 const addPhotoBtn = document.getElementById('addPhotoBtn');
 const takePhotoBtn = document.getElementById('takePhotoBtn');
 const exportBtn = document.getElementById('exportBtn');
+const deleteBtn = document.getElementById('deleteBtn'); // 새로 추가
 const photoInput = document.getElementById('photoInput');
 const cameraInput = document.getElementById('cameraInput');
 
@@ -22,6 +23,7 @@ cameraInput.addEventListener('change', (event) => handleFileSelect(event));
 exportBtn.addEventListener('click', () => generatePdf());
 fontSelector.addEventListener('change', (event) => applyFont(event.target.value));
 fontSizeInput.addEventListener('input', () => applyFontSizes());
+deleteBtn.addEventListener('click', deleteSelectedElement); // 새로 추가
 
 document.addEventListener('DOMContentLoaded', () => {
     applyFont(fontSelector.value);
@@ -33,8 +35,21 @@ imageContainer.addEventListener('click', (e) => {
             selectedElement.classList.remove('selected');
             selectedElement = null;
         }
+        updateToolbar(); // 새로 추가
     }
 });
+
+function updateToolbar() {
+    deleteBtn.disabled = selectedElement === null;
+}
+
+function deleteSelectedElement() {
+    if (selectedElement) {
+        selectedElement.remove();
+        selectedElement = null;
+        updateToolbar();
+    }
+}
 
 function applyFont(fontValue) {
     const selectedFont = fontValue.toLowerCase();
@@ -75,6 +90,7 @@ function makeElementSelectable(element) {
         if (target) {
             fontSizeInput.value = parseInt(getComputedStyle(target).fontSize);
         }
+        updateToolbar(); // 새로 추가
     });
 }
 
@@ -127,14 +143,14 @@ function generatePdf() {
     if (selectedElement) {
         selectedElement.classList.remove('selected');
         selectedElement = null;
+        updateToolbar();
     }
     
+    // (이하 PDF 생성 로직은 이전과 동일)
     const elementsToRestore = [];
-
     const processElement = (element) => {
         const p = document.createElement('p');
         p.textContent = element.tagName === 'H2' ? element.textContent : element.value;
-        
         const computedStyle = getComputedStyle(element);
         p.style.fontFamily = computedStyle.fontFamily;
         p.style.fontSize = computedStyle.fontSize;
@@ -143,18 +159,14 @@ function generatePdf() {
         p.style.boxSizing = 'border-box';
         p.style.width = '100%';
         p.style.textAlign = 'center';
-
         elementsToRestore.push({ original: element, replacement: p });
         element.style.display = 'none';
         element.parentNode.insertBefore(p, element);
     };
-
     imageContainer.querySelectorAll('.title-element h2').forEach(processElement);
     imageContainer.querySelectorAll('.draggable input').forEach(processElement);
-
     const swapButtons = imageContainer.querySelectorAll('.swap-btn');
     swapButtons.forEach(btn => btn.style.display = 'none');
-    
     html2canvas(imageContainer, { scale: 2, useCORS: true }).then(canvas => {
         const imgData = canvas.toDataURL('image/png');
         const pdf = new jsPDF('p', 'mm', 'a4');
@@ -162,22 +174,18 @@ function generatePdf() {
         const pdfHeight = pdf.internal.pageSize.getHeight();
         pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
         pdf.save('유니앱_문서.pdf');
-        
         elementsToRestore.forEach(item => {
             item.original.style.display = '';
             if (item.replacement.parentNode) {
                 item.replacement.parentNode.removeChild(item.replacement);
             }
         });
-
         swapButtons.forEach(btn => btn.style.display = '');
     });
 }
 
-
 interact('.draggable, .title-element')
   .draggable({
-    // --- (수정된 부분) allowFrom 옵션을 제거하여 모든 객체가 움직이도록 함 ---
     ignoreFrom: 'input, button, select',
     listeners: {
       move(event) {
@@ -192,7 +200,6 @@ interact('.draggable, .title-element')
     modifiers: [interact.modifiers.restrictRect({ restriction: '#marginGuide' })]
   })
   .resizable({
-    // --- (수정된 부분) allowFrom 옵션을 제거하여 모든 객체가 조절되도록 함 ---
     ignoreFrom: 'input, button, select',
     edges: { top: true, left: true, bottom: true, right: true },
     listeners: {
@@ -217,7 +224,20 @@ interact('.draggable, .title-element')
       }
     },
     modifiers: [
-        interact.modifiers.restrictSize({ min: { width: 100 } }),
+        interact.modifiers.restrictSize({ min: { width: 50 } }), // 100에서 50으로 수정
         interact.modifiers.restrictRect({ restriction: '#marginGuide' })
     ]
+  })
+  .gesturable({ // 새로 추가 (핀치 줌 기능)
+    onmove: function (event) {
+        const target = event.target;
+        let scale = parseFloat(target.getAttribute('data-scale')) || 1;
+        scale += event.ds;
+
+        let x = (parseFloat(target.getAttribute('data-x')) || 0);
+        let y = (parseFloat(target.getAttribute('data-y')) || 0);
+
+        target.style.transform = `translate(${x}px, ${y}px) scale(${scale})`;
+        target.setAttribute('data-scale', scale);
+    }
   });
