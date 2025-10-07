@@ -198,8 +198,7 @@ function generatePdf() {
         const imgData = canvas.toDataURL('image/png');
         const pdf = new jsPDF('p', 'mm', 'a4');
         const pdfWidth = pdf.internal.pageSize.getWidth();
-        const pdfHeight = pdf.internal.pageSiz
-        e.getHeight();
+        const pdfHeight = pdf.internal.pageSize.getHeight();
         pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
         pdf.save('유니앱_문서.pdf');
     });
